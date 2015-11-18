@@ -1,22 +1,32 @@
 #!/usr/bin/env python
 # coding=utf-8
 
-import urllib2, urllib, cookielib, re, time, os;
+import urllib2, urllib, cookielib, re, time, os, sys;
+try:
+        import cPickle as pickle;
+except ImportError:
+        import pickle;
 
-debug = 0;
+debug = 1;
 sleepTime = 0.5; #s
+timeOut = 20;
 encode = "gb2312";
 baseUrl = "http://www.qlql11.com";
 imgSrc = r'<img.*?src="(.*?)".*?>';
 urlSrc = r'<a href="(.*?)".*?>';
 imgExt = ".jpg";
-prefixStr = "http://www.qlql11.com/a/jingpintupian/yazhouyouhuo/2";
-url = "http://www.qlql11.com/a/jingpintupian/yazhouyouhuo/list_12_";
+prefixStr = "url";
+url = "url";
 headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.99 Safari/537.36",
-        "Referer": "http://www.qlql11.com/", "Connection": "keep-alive"};
+        "Referer": "url", "Connection": "keep-alive"};
 
 def AddBaseUrl(url):
     return baseUrl + url;
+
+def CurlGetData(url):
+    cmd = "curl --compressed -m " + str(timeOut) + " " + url;
+    print cmd;
+    return os.popen(cmd).read();
 
 def mkdir(path):
     path = path.strip()
@@ -50,11 +60,14 @@ class GetImg:
         urllib2.install_opener(opener);
 
         print "get data from " + dataUrl + " start!";
-        req = urllib2.Request(dataUrl, None, headers);
         try:
-            rsp = urllib2.urlopen(req, timeout = 1);
+            #req = urllib2.Request(dataUrl, None, headers);
+            #rsp = urllib2.urlopen(req, timeout = timeOut);
+            #text = rsp.read().decode(encode);
+            text = CurlGetData(dataUrl);
             print "get data from " + dataUrl + " end!";
-            return rsp.read().decode(encode);
+            #print text;
+            return text;
         except Exception, e:
             print e;
             return None;
@@ -82,12 +95,14 @@ class GetImg:
                 self.imgUrlList += self.imgPattern.findall(text);
 
     def SaveImg(self, imgUrl, fileName):
-        f = open(fileName, "wb");
         try:
-            imgData = urllib2.urlopen(imgUrl, timeout = 1).read();
+            #with open(fileName, "wb") as f:
+            #    with urllib.urlretrieve(imgUrl, fileName) as imgData:
+            #        f.write(imgData);
+            cmd = "curl --compressed -m " + str(timeOut) + " " + imgUrl + " > " + fileName;
+            print cmd;
+            os.system(cmd);
             print "save img url(" + imgUrl + ") to file " + fileName + ".";
-            f.write(imgData);
-            f.close();
         except Exception, e:
             print e;
 
@@ -99,12 +114,21 @@ class GetImg:
         print "img url list end\n";
         fileName = 1;
         print len(self.imgUrlList);
+        f = open(path + 'imgUrlFile', 'wb');
+        pickle.dump(self.imgUrlList, f);
+        f.close();
         for imgUrl in self.imgUrlList:
             self.SaveImg(imgUrl, path + str(fileName) + imgExt);
             time.sleep(sleepTime);
             fileName = fileName + 1;
 
-r = range(1, 100);
+if len(sys.argv) != 3:
+    print "Usage: %s left right" % sys.argv[0];
+    sys.exit();
+
+left = int(sys.argv[1]);
+right = int(sys.argv[2]);
+r = range(left, right);
 for idx in r:
     time.sleep(sleepTime);
     s = GetImg(url + str(idx) + ".html");
