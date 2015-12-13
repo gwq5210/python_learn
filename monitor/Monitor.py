@@ -7,18 +7,19 @@ import sys;
 import time;
 
 run_seconds = 10;
-sleep_time = 5;
+sleep_time = 1;
 seconds_left = run_seconds;
 times = run_seconds / sleep_time;
+eth = "wlp3s0";
 
-oldNetInfo = NetInfo("dev");
+oldNetInfo = NetInfo();
 oldNetInfo.LoadNetInfo();
-netInfo = NetInfo("dev");
+netInfo = NetInfo();
 netInfo.LoadNetInfo();
 
-oldCpuInfo = CpuInfo("stat");
+oldCpuInfo = CpuInfo();
 oldCpuInfo.LoadCpuInfo();
-cpuInfo = CpuInfo("stat");
+cpuInfo = CpuInfo();
 cpuInfo.LoadCpuInfo();
 
 totalIn = 0.0;
@@ -27,16 +28,16 @@ while seconds_left > 0:
     seconds_left = seconds_left - sleep_time;
     time.sleep(sleep_time);
     
-    netInfo = NetInfo("dev");
+    netInfo = NetInfo();
     netInfo.LoadNetInfo();
     diffNetInfo = netInfo - oldNetInfo;
-    totalIn += diffNetInfo.GetInMbps();
-    totalOut += diffNetInfo.GetOutMbps();
+    totalIn += diffNetInfo.GetInMbps(eth);
+    totalOut += diffNetInfo.GetOutMbps(eth);
     oldNetInfo = netInfo;
-    print "In %.2f Mbps." % diffNetInfo.GetInMbps();
-    print "Out %.2f Mbps." % diffNetInfo.GetOutMbps();
+    print "In %.2f Mbps." % diffNetInfo.GetInMbps(eth);
+    print "Out %.2f Mbps." % diffNetInfo.GetOutMbps(eth);
 
-    cpuInfo = CpuInfo("stat");
+    cpuInfo = CpuInfo();
     cpuInfo.LoadCpuInfo();
     diffCpuInfo = cpuInfo - oldCpuInfo;
     diffCpuInfo.CalcUsage();

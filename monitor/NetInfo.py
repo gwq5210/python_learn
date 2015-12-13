@@ -35,10 +35,10 @@ class NetInfo:
     def GetDevInfo(self, name):
         return self.info[name];
 
-    def GetInMbps(self, dev_name = "eth1"):
+    def GetInMbps(self, dev_name = "eth0"):
         return self.info[dev_name]["in_bytes"] * 8.0 / 1000000;
 
-    def GetOutMbps(self, dev_name = "eth1"):
+    def GetOutMbps(self, dev_name = "eth0"):
         return self.info[dev_name]["out_bytes"] * 8.0 / 1000000;
 
     def __sub__(self, otherInfo):
@@ -53,14 +53,15 @@ class NetInfo:
         return ret;
 
 if __name__ == "__main__":
+    eth = "eth1";
     netInfo = NetInfo("dev");
     netInfo.LoadNetInfo();
     otherInfo = NetInfo("dev");
     otherInfo.LoadNetInfo();
-    eth1_info = netInfo.GetDevInfo("eth1");
-    print eth1_info;
-    otherInfo.info["eth1"]["in_bytes"] = 1;
+    eth_info = netInfo.GetDevInfo(eth);
+    print eth_info;
+    otherInfo.info[eth]["in_bytes"] = 1;
     diffInfo = netInfo - otherInfo;
-    print diffInfo.info["eth1"]["in_bytes"];
-    print "In %.2f." % diffInfo.GetInMbps();
-    print "Out %.2f." % diffInfo.GetOutMbps();
+    print diffInfo.info[eth]["in_bytes"];
+    print "In %.2f." % diffInfo.GetInMbps(eth);
+    print "Out %.2f." % diffInfo.GetOutMbps(eth);

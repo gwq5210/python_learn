@@ -99,7 +99,8 @@ class CpuInfo:
         return ret;
 
 if __name__ == "__main__":
-    cpuInfo = CpuInfo("stat");
+    #cpuInfo = CpuInfo("stat");
+    cpuInfo = CpuInfo();
     cpuInfo.LoadCpuInfo();
     cpuInfo.CalcUsage();
     print "CoreNum %d." % cpuInfo.GetCoreNum();
