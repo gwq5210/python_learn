@@ -14,11 +14,18 @@ class ProcessCpuInfo:
     def GetProcessCpuInfo(self):
         self.infoStr = os.popen("top -b -n 1 | grep " + self.name + " | sed 's/^[ ]*//g' | awk '{print $12, $9}' | sort").read();
         self.infoStr = self.infoStr.strip();
+        if (self.infoStr == ""):
+            return;
         ret = {};
         for line in self.infoStr.split("\n"):
             datas = line.split();
             ret[datas[0]] = float(datas[1]);
         self.info = ret;
+
+    def Clear(self):
+        for name in self.info:
+            self.info[name] = 0.0;
+        self.infoStr = "";
 
     def CalcUsage(self, times):
         for name in self.info:
@@ -47,7 +54,7 @@ class ProcessCpuInfo:
         retStr = "";
         for name in self.info:
             retStr += name + " " + str(self.info[name]) + "\n";
-        return retStr;
+        return retStr.strip();
 
 
 

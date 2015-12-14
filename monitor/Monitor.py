@@ -2,20 +2,43 @@
 # coding=utf-8
 
 from NetInfo import NetInfo;
-from CpuInfo import CpuInfo, GetProcessCpuInfo;
+from CpuInfo import CpuInfo, ProcessCpuInfo;
 import sys;
 import time;
 import getopt;
+try:
+    import cPickle as pickle;
+except:
+    import pickle;
+
+class CpuNetInfo:
+    def __init__(self):
+        self.avgIn = 0.0;
+        self.avgOut = 0.0;
+        self.avgCpu = 0.0;
+        self.processCpu = {};
+
+    def __str__(self):
+        retStr = "";
+        retStr += "avgIn %.2f\n" % avgIn;
+        retStr += "avgOut %.2f\n" % avgOut;
+        retStr += "avgCpu %.2f\n" % avgCpu;
+        for process_name in self.processCpu:
+            retStr += process_name + ":\n";
+            retStr += str(self.processCpu[process_name]) + "\n";
+        return retStr.strip();
 
 def PrintUsage():
-    print "python %s [-o output_file] [-t run_seconds] [-i interval] [-p process_name] -h" % sys.argv[0];
+    print "python %s [-o output_file] [-t run_seconds] [-i interval] [-p process_name] -h -d" % sys.argv[0];
     print "-o output_file. default not save.";
     print "-t run_seconds. default 60s.";
     print "-i interval. default 5s.";
     print "-p process_name. default no used.";
+    print "-h print help information"
+    print "-d debug";
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "o:t:i:p:h");
+    opts, args = getopt.getopt(sys.argv[1:], "o:t:i:p:hd");
 except getopt.GetoptError as err:
 #   print help information and exit.
     print(err);
@@ -25,7 +48,8 @@ except getopt.GetoptError as err:
 output_file = "";
 run_seconds = 60;
 sleep_time = 5;
-process_name = "";
+process_names = [];
+debug = False;
 for opt, arg in opts:
     if opt == "-o":
         output_file = arg;
@@ -34,10 +58,12 @@ for opt, arg in opts:
     elif opt == "-i":
         sleep_time = int(arg);
     elif opt == "-p":
-        process_name = arg;
+        process_names.append(arg);
     elif opt == "-h":
         PrintUsage();
         sys.exit();
+    elif opt == "-d":
+        debug = True;
     else:
         print "Unknow option " + opt;
         sys.exit();
@@ -45,10 +71,10 @@ for opt, arg in opts:
 seconds_left = run_seconds;
 times = run_seconds / sleep_time;
 
-#eth = "wlp3s0";
-eth = "eth1";
-dev_file = "dev";
-cpu_file = "stat";
+eth = "wlp3s0";
+#eth = "eth1";
+dev_file = "/proc/net/dev";
+cpu_file = "/proc/stat";
 
 oldNetInfo = NetInfo(dev_file);
 oldNetInfo.LoadNetInfo();
@@ -63,8 +89,15 @@ cpuInfo.LoadCpuInfo();
 totalIn = 0.0;
 totalOut = 0.0;
 totalCpu = 0.0;
-totalLSvrCpu = ProcessCpuInfo();
-totalLrsyncCpu = ProcessCpuInfo();
+totalProcessCpu = {};
+processCpu = {};
+for process_name in process_names:
+    processCpu[process_name] = ProcessCpuInfo(process_name);
+    processCpu[process_name].GetProcessCpuInfo();
+    totalProcessCpu[process_name] = ProcessCpuInfo(process_name);
+    totalProcessCpu[process_name].GetProcessCpuInfo();
+    totalProcessCpu[process_name].Clear();
+
 while seconds_left > 0:
     print "time left %d." % seconds_left;
     seconds_left = seconds_left - sleep_time;
@@ -76,8 +109,6 @@ while seconds_left > 0:
     totalIn += diffNetInfo.GetInMbps(eth);
     totalOut += diffNetInfo.GetOutMbps(eth);
     oldNetInfo = netInfo;
-    print "In %.2f Mbps." % diffNetInfo.GetInMbps(eth);
-    print "Out %.2f Mbps." % diffNetInfo.GetOutMbps(eth);
 
     cpuInfo = CpuInfo(cpu_file);
     cpuInfo.LoadCpuInfo();
@@ -86,29 +117,45 @@ while seconds_left > 0:
     oldCpuInfo = cpuInfo;
     maxUsage, maxIdx = diffCpuInfo.GetMaxUsage();
     totalCpu += maxUsage;
-    print "Cpu %d %.2f%%." % (maxIdx, maxUsage);
-    if process_name != "":
-        processCpuInfoStr = GetProcessCpuInfo(process_name, True);
-        with open(output_file, "w+") as f:
-            f.write(processCpuInfoStr);
+
+    if debug:
+        print "In %.2f Mbps." % diffNetInfo.GetInMbps(eth);
+        print "Out %.2f Mbps." % diffNetInfo.GetOutMbps(eth);
+        print "Cpu %d %.2f%%." % (maxIdx, maxUsage);
+    for process_name in process_names:
+        processCpu[process_name] = ProcessCpuInfo(process_name);
+        processCpu[process_name].GetProcessCpuInfo();
+        totalProcessCpu[process_name] = totalProcessCpu[process_name] + processCpu[process_name];
+        if debug:
+            print processCpu[process_name].infoStr;
 
 avgIn = totalIn / times;
 avgOut = totalOut / times;
 avgCpu = totalCpu / times;
-print "summary:"
-print "avgIn: %.2f Mbps" % avgIn;
-print "avgOut: %.2f Mbps" % avgOut;
-print "avgCpu: %.2f%%" % avgCpu;
 
+for process_name in process_names:
+    totalProcessCpu[process_name].CalcUsage(times);
+
+allInfo = CpuNetInfo();
+allInfo.avgIn = avgIn;
+allInfo.avgOut = avgOut;
+allInfo.avgCpu = avgCpu;
+allInfo.processCpu = totalProcessCpu;
 if output_file == "":
+    print "summary:"
+    print str(allInfo);
     sys.exit();
 
-with open(output_file, "w") as f:
-    f.write("avgIn %.2f\n" % avgIn)
-    f.write("avgOut %.2f\n" % avgOut);
-    f.write("avgCpu %.2f\n" % avgCpu);
+if debug:
+    print "before:"
+    print str(allInfo);
 
-if process_name != "":
-    processCpuInfoStr = GetProcessCpuInfo(process_name, True);
-    with open(output_file, "w+") as f:
-        f.write(processCpuInfoStr);
+with open(output_file, "w") as f:
+    pickle.dump(allInfo, f);
+
+if debug:
+    info  = None;
+    with open(output_file) as f:
+        info = pickle.load(f);
+    print "after:"
+    print str(info);
