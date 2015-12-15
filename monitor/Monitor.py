@@ -3,6 +3,7 @@
 
 from NetInfo import NetInfo;
 from CpuInfo import CpuInfo, ProcessCpuInfo;
+from Common import CpuNetInfo;
 import sys;
 import time;
 import getopt;
@@ -10,23 +11,6 @@ try:
     import cPickle as pickle;
 except:
     import pickle;
-
-class CpuNetInfo:
-    def __init__(self):
-        self.avgIn = 0.0;
-        self.avgOut = 0.0;
-        self.avgCpu = 0.0;
-        self.processCpu = {};
-
-    def __str__(self):
-        retStr = "";
-        retStr += "avgIn %.2f\n" % avgIn;
-        retStr += "avgOut %.2f\n" % avgOut;
-        retStr += "avgCpu %.2f\n" % avgCpu;
-        for process_name in self.processCpu:
-            retStr += process_name + ":\n";
-            retStr += str(self.processCpu[process_name]) + "\n";
-        return retStr.strip();
 
 def PrintUsage():
     print "python %s [-o output_file] [-t run_seconds] [-i interval] [-p process_name] -h -d" % sys.argv[0];
