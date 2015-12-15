@@ -10,9 +10,9 @@ class CpuNetInfo:
 
     def __str__(self):
         retStr = "";
-        retStr += "avgIn %.2f\n" % avgIn;
-        retStr += "avgOut %.2f\n" % avgOut;
-        retStr += "avgCpu %.2f\n" % avgCpu;
+        retStr += "avgIn %.2f\n" % self.avgIn;
+        retStr += "avgOut %.2f\n" % self.avgOut;
+        retStr += "avgCpu %.2f\n" % self.avgCpu;
         for process_name in self.processCpu:
             retStr += process_name + ":\n";
             retStr += str(self.processCpu[process_name]) + "\n";
