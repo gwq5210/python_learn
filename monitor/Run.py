@@ -94,3 +94,5 @@ GatherInfo();
 
 LoadMonitorInfo();
 LoadPresscallInfo();
+
+WriteXls();
