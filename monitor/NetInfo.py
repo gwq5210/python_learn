@@ -35,11 +35,11 @@ class NetInfo:
     def GetDevInfo(self, name):
         return self.info[name];
 
-    def GetInMbps(self, dev_name = "eth0"):
-        return self.info[dev_name]["in_bytes"] * 8.0 / 1000000;
+    def GetInMbps(self, dev_name = "eth0", sleep_time = 1):
+        return self.info[dev_name]["in_bytes"] * 8.0 / 1000000 / sleep_time;
 
-    def GetOutMbps(self, dev_name = "eth0"):
-        return self.info[dev_name]["out_bytes"] * 8.0 / 1000000;
+    def GetOutMbps(self, dev_name = "eth0", sleep_time = 1):
+        return self.info[dev_name]["out_bytes"] * 8.0 / 1000000 / sleep_time;
 
     def __sub__(self, otherInfo):
         retInfo = {};

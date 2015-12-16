@@ -90,8 +90,8 @@ while seconds_left > 0:
     netInfo = NetInfo(dev_file);
     netInfo.LoadNetInfo();
     diffNetInfo = netInfo - oldNetInfo;
-    totalIn += diffNetInfo.GetInMbps(eth);
-    totalOut += diffNetInfo.GetOutMbps(eth);
+    totalIn += diffNetInfo.GetInMbps(eth, sleep_time);
+    totalOut += diffNetInfo.GetOutMbps(eth, sleep_time);
     oldNetInfo = netInfo;
 
     cpuInfo = CpuInfo(cpu_file);
@@ -103,8 +103,8 @@ while seconds_left > 0:
     totalCpu += maxUsage;
 
     if debug:
-        print "In %.2f Mbps." % diffNetInfo.GetInMbps(eth);
-        print "Out %.2f Mbps." % diffNetInfo.GetOutMbps(eth);
+        print "In %.2f Mbps." % diffNetInfo.GetInMbps(eth, sleep_time);
+        print "Out %.2f Mbps." % diffNetInfo.GetOutMbps(eth, sleep_time);
         print "Cpu %d %.2f%%." % (maxIdx, maxUsage);
     for process_name in process_names:
         processCpu[process_name] = ProcessCpuInfo(process_name);
