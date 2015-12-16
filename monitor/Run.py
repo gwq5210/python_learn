@@ -44,9 +44,24 @@ def GatherInfo():
     # presscall info
     print "gather presscall info:"
     SaveWithIp(presscall_ips_red, name = presscall_file, remote_name = presscall_file,
-            pwd = red_password, local_dir = presscall_local_dir, remote_dir = presscall_remote_dir);
+            pwd = red_password, remote_dir = presscall_remote_dir);
     SaveWithIp(presscall_ips, name = presscall_file, remote_name = presscall_file,
-            local_dir = presscall_local_dir, remote_dir = presscall_remote_dir);
+            remote_dir = presscall_remote_dir);
+
+def LoadAllMonitorInfo():
+    print "load monitor info:"
+    LoadMonitorInfo(lsvr_ips);
+    LoadMonitorInfo(d_access_ips);
+    LoadMonitorInfo(sr_access_ips);
+    LoadMonitorInfo(d_cache_ips);
+    LoadMonitorInfo(sr_cache_ips);
+
+def LoadAllPresscallInfo():
+    LoadPresscallInfo(presscall_ips_red);
+    LoadPresscallInfo(presscall_ips);
+
+def WriteXls():
+    print "write xls.";
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], "c:t:s:r:knh");
@@ -87,12 +102,20 @@ if mcp_cnt == 0:
 print "start presscall...";
 StartPresscall(mcp_cnt, req_type, thread_num, run_seconds, is_south);
 
-#time.sleep(30);
+sleep_time = 30;
+print "sleep %d seconds..." % sleep_time;
+#time.sleep(sleep_time);
+
+print "start monitor. will run 60 seconds.";
 StartMonitor();
+
+sleep_time = 30;
+print "wait for presscall stop. sleep %d seconds..." % sleep_time;
+#time.sleep(sleep_time);
 
 GatherInfo();
 
-LoadMonitorInfo();
-LoadPresscallInfo();
+LoadAllMonitorInfo();
+LoadAllPresscallInfo();
 
 WriteXls();

@@ -12,7 +12,8 @@ class ProcessCpuInfo:
         self.usageKey = "usage";
 
     def GetProcessCpuInfo(self):
-        self.infoStr = os.popen("top -b -n 1 | grep " + self.name + " | sed 's/^[ ]*//g' | awk '{print $12, $9}' | sort").read();
+        cmd = "top -b -n 1 | grep " + self.name + " | sed 's/^[ ]*//g' | awk '{print $12, $9}' | sort";
+        self.infoStr = os.popen(cmd).read();
         self.infoStr = self.infoStr.strip();
         if (self.infoStr == ""):
             return;

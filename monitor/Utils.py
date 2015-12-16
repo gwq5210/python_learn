@@ -3,6 +3,10 @@
 
 import os;
 from Common import *;
+try:
+    import cPickle as pickle;
+except:
+    import pickle;
 
 def CopyFile(ip, name = "", remote_name = "", user = "root", pwd = password, local_dir = local_dir, remote_dir = remote_dir, is_copy_from = True):
     path = local_dir;
@@ -46,6 +50,26 @@ def CopyFrom(ip, name = "", remote_name = "", user = "root", pwd = password, loc
 def SaveWithIp(ips, name = infoFileName, remote_name = infoFileName, user = "root", pwd = password, local_dir = local_dir, remote_dir = remote_dir):
     for ip in ips:
         CopyFrom(ip, name + "." + ip, remote_name, user, pwd, local_dir, remote_dir);
+
+def LoadMonitorInfo(ips, name = infoFileName, fileDir = local_dir):
+    ret = {};
+    for ip in ips:
+        fileName = fileDir + "/" + name + "." + ip;
+        print "open file %s." % fileName;
+        #with open(fileName) as f:
+        #    info = pickle.load(f);
+        #    ret[ip] = info;
+    return ret;
+
+def LoadPresscallInfo(ips, name = presscall_file, fileDir = local_dir):
+    ret = {};
+    for ip in ips:
+        fileName = fileDir + "/" + name + "." + ip;
+        print "open file %s." % fileName;
+        #with open(fileName) as f:
+        #with open(fileName) as f:
+        #    pass
+    return ret;
 
 def KillPresscall():
     for ip in presscall_ips:

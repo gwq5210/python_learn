@@ -6,6 +6,7 @@ from CpuInfo import CpuInfo, ProcessCpuInfo;
 from Common import CpuNetInfo;
 import sys;
 import time;
+from datetime import datetime;
 import getopt;
 try:
     import cPickle as pickle;
@@ -64,6 +65,9 @@ oldNetInfo = NetInfo(dev_file);
 oldNetInfo.LoadNetInfo();
 netInfo = NetInfo(dev_file);
 netInfo.LoadNetInfo();
+beginTime = datetime.now();
+sampleBeginTime = datetime.now();
+sampleEndTime = datetime.now();
 
 oldCpuInfo = CpuInfo(cpu_file);
 oldCpuInfo.LoadCpuInfo();
@@ -82,16 +86,19 @@ for process_name in process_names:
     totalProcessCpu[process_name].GetProcessCpuInfo();
     totalProcessCpu[process_name].Clear();
 
-while seconds_left > 0:
-    print "time left %d." % seconds_left;
-    seconds_left = seconds_left - sleep_time;
+cnt = times;
+while cnt > 0:
+    print "times %d." % cnt;
     time.sleep(sleep_time);
     
     netInfo = NetInfo(dev_file);
     netInfo.LoadNetInfo();
     diffNetInfo = netInfo - oldNetInfo;
-    totalIn += diffNetInfo.GetInMbps(eth, sleep_time);
-    totalOut += diffNetInfo.GetOutMbps(eth, sleep_time);
+    totalIn += diffNetInfo.GetInMbps(eth);
+    totalOut += diffNetInfo.GetOutMbps(eth);
+    sampleEndTime = datetime.now();
+    sampleSeconds = (sampleEndTime - sampleBeginTime).seconds;
+    sampleBeginTime = datetime.now();
     oldNetInfo = netInfo;
 
     cpuInfo = CpuInfo(cpu_file);
@@ -103,8 +110,9 @@ while seconds_left > 0:
     totalCpu += maxUsage;
 
     if debug:
-        print "In %.2f Mbps." % diffNetInfo.GetInMbps(eth, sleep_time);
-        print "Out %.2f Mbps." % diffNetInfo.GetOutMbps(eth, sleep_time);
+        print "Sample Seconds %d." % sampleSeconds;
+        print "In %.2f Mbps." % diffNetInfo.GetInMbps(eth, sampleSeconds);
+        print "Out %.2f Mbps." % diffNetInfo.GetOutMbps(eth, sampleSeconds);
         print "Cpu %d %.2f%%." % (maxIdx, maxUsage);
     for process_name in process_names:
         processCpu[process_name] = ProcessCpuInfo(process_name);
@@ -112,9 +120,12 @@ while seconds_left > 0:
         totalProcessCpu[process_name] = totalProcessCpu[process_name] + processCpu[process_name];
         if debug:
             print processCpu[process_name].infoStr;
+    cnt = cnt - 1;
 
-avgIn = totalIn / times;
-avgOut = totalOut / times;
+endTime = datetime.now();
+allTime = (endTime - beginTime).seconds;
+avgIn = totalIn / allTime;
+avgOut = totalOut / allTime;
 avgCpu = totalCpu / times;
 
 for process_name in process_names:
