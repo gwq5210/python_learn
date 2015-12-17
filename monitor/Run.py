@@ -120,8 +120,9 @@ def WriteXls(info, fileName, apiStr):
     for key in info:
         if key != "LSVR_MAX_CPU":
             writer.SetCell(apiRowMap[apiStr], dataColMap[key], info[key], 1);
-    for key in dataHeaderColMap:
-        writer.SetCell(apiHeaderRowMap[apiStr], dataHeaderColMap[key], info[key], 1);
+    if apiHeaderRowMap.has_key(apiStr):
+        for key in dataHeaderColMap:
+            writer.SetCell(apiHeaderRowMap[apiStr], dataHeaderColMap[key], info[key], 1);
     writer.Save(fileName);
 
 def InfoToStr(info):
@@ -143,7 +144,6 @@ mcp_cnt = 0;
 run_seconds = 120;
 thread_num = 1;
 req_type = 1;
-apiStr = apiStrMap[1];
 fileName = "test.xls";
 is_south = True;
 is_load = False;
@@ -171,6 +171,8 @@ for opt, arg in opts:
     else:
         print "Unknow option " + opt;
         sys.exit();
+
+apiStr = apiStrMap[req_type];
 
 if mcp_cnt == 0:
     print "-c option mcp_cnt is required.";

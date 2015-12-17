@@ -14,6 +14,10 @@ def GetStatFile():
     cmd = "cd /data/jackjluo/sh/; sh ./get_stat.sh";
     ExeRemoteCmd(ip, cmd);
 
+def SetDetailItemNum(num):
+    ip = "10.175.70.10";
+    cmd = "cd /usr/local/services/LSvr/bin/; sh ./lsvr_modify_attr.sh 20 DetailItemNum %d" % num;
+    ExeRemoteCmd(ip, cmd);
 
 min_cnt = 4;
 max_cnt = 24;
@@ -25,6 +29,7 @@ baseName = "test.xls";
 fileName = "";
 reqSet = set([1, 3, 4, 5, 9, 10, 11, 12]);
 totalCnt = 0;
+SetDetailItemNum(111);
 while mcp_cnt <= 24:
     SetLSvrMcpCnt(mcp_cnt);
 
@@ -38,6 +43,27 @@ while mcp_cnt <= 24:
             print cmd;
             #os.system(cmd);
             GetStatFile();
+            totalCnt += 1;
+        thread_num += min_thread;
+    mcp_cnt += min_cnt;
+print "total count: %d" % totalCnt;
+
+mcp_cnt = min_cnt;
+thread_num = min_thread;
+req_type = 1;
+SetDetailItemNum(10);
+while mcp_cnt <= 24:
+    SetLSvrMcpCnt(mcp_cnt);
+
+    thread_num = min_thread;
+    while thread_num <= max_thread:
+        fileName = "test_%d_%d.xls" % (mcp_cnt, thread_num);
+        if not os.path.isfile(fileName):
+            os.system("cp test.xls %s" % fileName);
+        cmd = "python Run.py -c %d -s %d -r %d -f %s" % (mcp_cnt, thread_num, req_type, fileName);
+        print cmd;
+        #os.system(cmd);
+        GetStatFile();
         thread_num += min_thread;
         totalCnt += 1;
     mcp_cnt += min_cnt;
