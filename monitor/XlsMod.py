@@ -34,6 +34,9 @@ class XlsMod:
 
 if __name__ == "__main__":
     xlsMod = XlsMod("test.xls");
+    apiStr = "SEND_HB";
     for key in dataColMap:
-        xlsMod.SetCell(apiRowMap["SEND_HB"], dataColMap[key], dataColMap[key], 1);
+        xlsMod.SetCell(apiRowMap[apiStr], dataColMap[key], dataColMap[key], 1);
+    xlsMod.SetCell(apiHeaderRowMap[apiStr], 3, "test", 1);
+    xlsMod.SetCell(apiHeaderRowMap[apiStr], 4, "test", 1);
     xlsMod.Save("target.xls");

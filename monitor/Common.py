@@ -10,6 +10,19 @@ dataColMap = {"THREAD_NUM": 1, "TPS": 2, "AVG_TIME": 3, "MAX_TIME": 4, "LEVEL3":
         "SR_ACCESS_IN": 13, "SR_ACCESS_OUT": 14, "D_ACCESS_CPU": 15, "D_ACCESS_IN": 16, "D_ACCESS_OUT": 17,
         "SR_CACHE_CPU": 18, "SR_CACHE_IN": 19, "SR_CACHE_OUT": 20, "D_CACHE_CPU": 21, "D_CACHE_IN": 22,
         "D_CACHE_OUT": 23};
+apiHeaderRowMap = {"SEND_HB": 1, "OPEN_CHECK": 2, "OPEN_HB": 3, "CHANGE_STATUS": 4, "GET_DLIST": 5,
+        "GET_SEND": 6, "GET_RECV": 7, "DEL_SEND": 8, "DEL_RECV": 9};
+dataHeaderColMap = {"TPS": 3, "AVG_TIME": 5, "LEVEL2": 6, "LSVR_MAX_CPU": 7};
+
+apiStrMap = {};
+apiStrMap[1] = "SEND_HB";
+apiStrMap[3] = "RUSH_CHECK";
+apiStrMap[4] = "OPEN_CHECK";
+apiStrMap[5] = "OPEN_HB";
+apiStrMap[9] = "GET_DHEADER";
+apiStrMap[10] = "GET_DLIST";
+apiStrMap[11] = "GET_SEND";
+apiStrMap[12] = "GET_RECV";
 
 presscall_ips_red = ["127.0.0.1"];
 presscall_ips = ["127.0.0.1"];
@@ -29,12 +42,38 @@ presscall_local_dir = "presscall_local_dir";
 presscall_remote_dir = "presscall_remote_dir";
 presscall_file = "presscall_file";
 
+presscall_ips_red = ["10.153.135.166", "10.198.12.220"];
+presscall_ips = ["10.238.23.77", "10.238.25.45", "10.175.70.20", "10.175.70.27", "10.175.70.11"];
+#lsvr_ips = ["10.175.70.28", "10.175.70.10"];
+lsvr_ips = ["10.175.70.10"];
+d_access_ips = ["10.175.70.26", "10.175.70.19"];
+sr_access_ips = ["10.175.70.18", "10.175.70.21"];
+d_cache_ips = ["10.175.70.17"];
+sr_cache_ips = ["10.175.70.9"];
+password = "2014@cfd";
+red_password = "red@cat!@#";
+kv_user = "user_00";
+kv_password = "qazPL,123";
+local_dir = "/data/tuskguo/monitor";
+remote_dir = "/root/monitor";
+infoFileName = "test.dat";
+presscall_local_dir = "/data/tuskguo/presscall_test/bin";
+presscall_remote_dir = "/root/presscall_test/bin";
+presscall_file = "resultfile";
+
 class CpuNetInfo:
     def __init__(self):
         self.avgIn = 0.0;
         self.avgOut = 0.0;
         self.avgCpu = 0.0;
         self.processCpu = {};
+
+    def GetProcessCpuStr(self):
+        retStr = "";
+        for process_name in self.processCpu:
+            retStr += process_name + ":\n";
+            retStr += str(self.processCpu[process_name]) + "\n";
+        return retStr.strip();
 
     def __str__(self):
         retStr = "";
@@ -44,4 +83,31 @@ class CpuNetInfo:
         for process_name in self.processCpu:
             retStr += process_name + ":\n";
             retStr += str(self.processCpu[process_name]) + "\n";
+        return retStr.strip();
+
+class PresscallInfo:
+    def __init__(self):
+        self.info = {};
+        self.info["THREAD_NUM"] = 0;
+        self.info["TPS"] = 0.0;
+        self.info["AVG_TIME"] = 0.0;
+        self.info["MAX_TIME"] = 0.0;
+        self.info["LEVEL3"] = 0.0;
+        self.info["LEVEL2"] = 0.0;
+        self.info["LEVEL1"] = 0.0;
+
+    def LoadFromStr(self, s):
+        datas = s.split();
+        self.info["THREAD_NUM"] = int(datas[1]);
+        self.info["TPS"] = float(datas[2]);
+        self.info["AVG_TIME"] = float(datas[3]);
+        self.info["MAX_TIME"] = float(datas[4]);
+        self.info["LEVEL3"] = float(datas[5]);
+        self.info["LEVEL2"] = float(datas[6]);
+        self.info["LEVEL1"] = float(datas[7]);
+
+    def __str__(self):
+        retStr = "";
+        for key in self.info:
+            retStr += key + ": " + str(self.info[key]) + "\n";
         return retStr.strip();
