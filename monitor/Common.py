@@ -42,25 +42,6 @@ presscall_local_dir = "presscall_local_dir";
 presscall_remote_dir = "presscall_remote_dir";
 presscall_file = "presscall_file";
 
-presscall_ips_red = ["10.153.135.166", "10.198.12.220"];
-presscall_ips = ["10.238.23.77", "10.238.25.45", "10.175.70.20", "10.175.70.27", "10.175.70.11"];
-#lsvr_ips = ["10.175.70.28", "10.175.70.10"];
-lsvr_ips = ["10.175.70.10"];
-d_access_ips = ["10.175.70.26", "10.175.70.19"];
-sr_access_ips = ["10.175.70.18", "10.175.70.21"];
-d_cache_ips = ["10.175.70.17"];
-sr_cache_ips = ["10.175.70.9"];
-password = "2014@cfd";
-red_password = "red@cat!@#";
-kv_user = "user_00";
-kv_password = "qazPL,123";
-local_dir = "/data/tuskguo/monitor";
-remote_dir = "/root/monitor";
-infoFileName = "test.dat";
-presscall_local_dir = "/data/tuskguo/presscall_test/bin";
-presscall_remote_dir = "/root/presscall_test/bin";
-presscall_file = "resultfile";
-
 class CpuNetInfo:
     def __init__(self):
         self.avgIn = 0.0;
