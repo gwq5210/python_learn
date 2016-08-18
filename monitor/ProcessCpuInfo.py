@@ -22,8 +22,8 @@ def GetProcessCpuInfo(name, ret_str = False):
         return ret;
 
 if __name__ == "__main__":
-    print GetProcessCpuInfo("LSvr_mcp", True);
-    print GetProcessCpuInfo("LSvr_mcp");
+    print GetProcessCpuInfo("test", True);
+    print GetProcessCpuInfo("test");
     print "\x1b[0;10m0.0";
     print "0.0";
     print "\033[1;31;1m0.0";
